@@ -1,25 +1,38 @@
-import logo from './logo.svg';
 import './App.css';
+import React from 'react'
+import {getRequest} from "./common/getRequest";
+import CustomGoogleMap from "./CustomGoogleMap";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+
+    constructor() {
+        super();
+        this.state = {
+            stations: [],
+            stationsDetails: []
+        }
+    }
+
+    componentDidMount() {
+        getRequest('https://gbfs.urbansharing.com/oslobysykkel.no/station_information.json')
+            .then(stationsData => this.setState({stations: stationsData.data.stations}))
+            .then(() => getRequest('https://gbfs.urbansharing.com/oslobysykkel.no/station_status.json'))
+            .then(stationsDetailsData => this.setState({stationsDetails: stationsDetailsData.data.stations}))
+            .catch(error => console.error('could not fetch Data'))
+    }
+
+    render() {
+        return (
+            <div className="App">
+                <h1> Bikes App - please click the marker to see details</h1>
+                <CustomGoogleMap
+                    markers={this.state.stations}
+                    stationsDetails={this.state.stationsDetails}
+                />
+            </div>
+        );
+    }
+
 }
 
 export default App;
